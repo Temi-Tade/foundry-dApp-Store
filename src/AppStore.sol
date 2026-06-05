@@ -64,9 +64,9 @@ contract AppStore {
     event RateApp(bytes32 appKey, address user);
     event SponsorApp(address sponsor);
 
-    constructor(AppStoreToken _tokenAddress) {
+    constructor() {
         s_owner = msg.sender;
-        s_tokenAddress = _tokenAddress;
+        s_tokenAddress = new AppStoreToken();
     }
 
     modifier appGuard(bytes32 _appKey) {
@@ -112,7 +112,7 @@ contract AppStore {
             revert AppStore__PaymentRequired();
         }
 
-        emit BuyTokens(msg.sender, _amount);
+        emit BuyTokens(msg.sender, _amount * 10**18);
         AppStoreToken(s_tokenAddress).mint(msg.sender, _amount * 10 ** 18);
     }
 
@@ -321,7 +321,15 @@ contract AppStore {
         return bytes32(_createAppKey(_url));
     }
 
-    function getUserRating(address user, bytes32 _appKey) external view returns (uint8) {
-        return s_votes[user][_appKey];
+    function getUserRating(address _user, bytes32 _appKey) external view returns (uint8) {
+        return s_votes[_user][_appKey];
+    }
+
+    function getIsDev(address _user) external view returns (bool) {
+        return s_devs[_user];
+    }
+
+    function getTokenBalance(address _dev) external view returns(uint256) {
+        return s_tokenAddress.balanceOf(_dev);
     }
 }
